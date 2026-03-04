@@ -31,12 +31,14 @@ import SellerOverview from "@/main/seller/pages/dashboard/Overview";
 import CreateAds from "@/main/seller/pages/ads/CreateAds/CreateAds";
 import SellerChat from "@/main/seller/pages/chats/SellerChat";
 import SellerAllAds from "@/main/seller/pages/ads/allAds/SellerAllAds";
-import SellerPayments from "@/main/seller/pages/payments/SellerPayments";
+// import SellerPayments from "@/main/seller/pages/payments/SellerPayments";
 import CompleteSellerProfile from "@/main/seller/pages/create-profile/CompleteSellerProfile";
 import SellerEditAds from "@/main/seller/pages/ads/editAds/EditAds";
 import SellerPurchases from "@/main/user/Pages/my-purches/SellerPurchases";
 import UserChat from "@/main/user/Pages/chats/UserChat";
 import SellerRequests from "@/main/admin/pages/seller-request/SellerRequests";
+import Subscription from "@/main/admin/pages/subscription/Subscription";
+import SellerSubscriptionPage from "@/main/seller/pages/subscription/SellerSubscriptionPage";
 
 export const router = createBrowserRouter([
   {
@@ -163,6 +165,10 @@ export const router = createBrowserRouter([
         path: "sub-category",
         element: <SubCategory />,
       },
+      {
+        path: "subscription",
+        element: <Subscription />
+      },
     ],
   },
   {
@@ -189,10 +195,14 @@ export const router = createBrowserRouter([
         path: "all-ads",
         element: <SellerAllAds />,
       },
+      // {
+      //   path: "payments",
+      //   element: <SellerPayments />,
+      // },
       {
-        path: "payments",
-        element: <SellerPayments />,
-      },
+        path: "subscription",
+        element: <SellerSubscriptionPage />
+      }
     ],
   },
 ]);

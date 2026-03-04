@@ -30,7 +30,7 @@ export const adsApi = baseApi.injectEndpoints({
         url: `/ads/${adId}`,
         method: "GET",
       }),
-      providesTags: (result, error, arg) => [{ type: "Ad", id: arg }],
+      providesTags: ( arg) => [{ type: "Ad", id: arg }],
     }),
 
     // --- Seller Specific Mutations (Requires Auth) ---
@@ -53,7 +53,7 @@ export const adsApi = baseApi.injectEndpoints({
         method: "PATCH",
         body: data,
       }),
-      invalidatesTags: (result, error, { adId }) => [
+      invalidatesTags: ({ adId }) => [
         "Ad",
         { type: "Ad", id: adId },
       ],
@@ -72,7 +72,7 @@ export const adsApi = baseApi.injectEndpoints({
         url: `/ads/${adId}/toggle-sold`,
         method: "PATCH",
       }),
-      invalidatesTags: (result, error, adId) => [{ type: "Ad", id: adId }],
+      invalidatesTags: (adId) => [{ type: "Ad", id: adId }],
     }),
 
     // --- Engagement/Analytics ---

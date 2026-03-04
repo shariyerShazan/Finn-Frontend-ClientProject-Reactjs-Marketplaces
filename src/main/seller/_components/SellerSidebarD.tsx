@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 
 import { Link, useLocation } from "react-router-dom";
@@ -8,10 +9,10 @@ import {
 //   ShieldCheck,
   ChevronLeft,
 } from "lucide-react";
-import { MdPayments } from "react-icons/md";
+// import { MdPayments } from "react-icons/md";
 // import { TbCategory2 } from "react-icons/tb";
 // import { TiFlowChildren } from "react-icons/ti";
-import { IoChatboxOutline } from "react-icons/io5";
+import { IoChatboxOutline, IoPaperPlaneOutline } from "react-icons/io5";
 import { TbDeviceIpadStar } from "react-icons/tb";
 
 
@@ -30,7 +31,7 @@ const SellerSidebarD = ({
 }: SidebarProps) => {
   const { pathname } = useLocation();
 
-  const menuItems = [
+  const menuItems: any = [
     { name: "Dashboard", icon: LayoutDashboard, path: "/seller/Dashboard" },
     {
       name: "All Ads",
@@ -39,11 +40,16 @@ const SellerSidebarD = ({
     },
     { name: "chat", icon: IoChatboxOutline, path: "/seller/dashboard/chat" },
     {
-      name: "payments",
-      icon: MdPayments,
-      path: "/seller/dashboard/payments",
-      badge: "12",
+      name: "subscription",
+      icon: IoPaperPlaneOutline,
+      path: "/seller/dashboard/subscription",
     },
+    // {
+    //   name: "payments",
+    //   icon: MdPayments,
+    //   path: "/seller/dashboard/payments",
+    //   badge: "12",
+    // },
     // { name: "Marketplace", icon: ShoppingBag, path: "/admin/ads" },
     // {
     //   name: "Transactions",
@@ -101,7 +107,7 @@ const SellerSidebarD = ({
 
       {/* Nav Items */}
       <nav className="p-3 space-y-1.5 mt-4">
-        {menuItems.map((item) => {
+        {menuItems.map((item : any) => {
           const isActive = pathname === item.path;
           return (
             <Link
@@ -118,7 +124,7 @@ const SellerSidebarD = ({
               )}
               {!isCollapsed && item.badge && (
                 <span className="ml-auto bg-[#D55C5E] text-white text-[9px] px-1.5 py-0.5 rounded font-black">
-                  {item.badge}
+                  {item.badge }
                 </span>
               )}
               {/* Tooltip for Collapsed Mode */}

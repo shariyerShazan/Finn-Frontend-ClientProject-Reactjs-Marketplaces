@@ -1,12 +1,12 @@
-// import React from 'react'
-import BillingHistory from './_components/BillingHistory'
+// // import React from 'react'
+// import BillingHistory from './_components/BillingHistory'
 
-const SellerPayments = () => {
-  return (
-    <div className='p-4'>
-      <BillingHistory />
-    </div>
-  )
-}
+// const SellerPayments = () => {
+//   return (
+//     <div className='p-4'>
+//       <BillingHistory />
+//     </div>
+//   )
+// }
 
-export default SellerPayments
+// export default SellerPayments

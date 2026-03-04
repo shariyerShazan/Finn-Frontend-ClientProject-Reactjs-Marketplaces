@@ -317,7 +317,7 @@ const UserViewModal = ({ isOpen, onClose, userId }: UserViewModalProps) => {
                   <button
                     onClick={handleStatus}
                     disabled={isSuspending}
-                    className={`flex-1 py-3 rounded-xl text-xs font-black text-white transition-all flex items-center justify-center gap-2 shadow-lg ${user.isSuspended ? "bg-emerald-600 shadow-emerald-100 hover:bg-emerald-700" : "bg-amber-500 shadow-amber-100 hover:bg-amber-600"}`}
+                    className={`flex-1 py-3 cursor-pointer rounded-xl text-xs font-black text-white transition-all flex items-center justify-center gap-2 shadow-lg ${user.isSuspended ? "bg-emerald-600 shadow-emerald-100 hover:bg-emerald-700" : "bg-amber-500 shadow-amber-100 hover:bg-amber-600"}`}
                   >
                     {isSuspending ? (
                       <Loader2 size={16} className="animate-spin" />
@@ -331,7 +331,7 @@ const UserViewModal = ({ isOpen, onClose, userId }: UserViewModalProps) => {
                   <button
                     onClick={handleDelete}
                     disabled={isDeleting}
-                    className="px-5 py-3 bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-white rounded-xl border border-rose-100 transition-all flex items-center justify-center"
+                    className="px-5 py-3 cursor-pointer bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-white rounded-xl border border-rose-100 transition-all flex items-center justify-center"
                   >
                     {isDeleting ? (
                       <Loader2 size={16} className="animate-spin" />

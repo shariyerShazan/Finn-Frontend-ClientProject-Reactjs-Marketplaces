@@ -230,7 +230,7 @@ const AdminReport = () => {
         </div>
       </div>
 
-      {/* 🔥 ডিটেইলস এবং অ্যাকশন মডাল */}
+  
       <ReportActionDialog
         isOpen={isModalOpen}
         onClose={() => {

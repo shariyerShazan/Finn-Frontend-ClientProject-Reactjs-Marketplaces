@@ -9,6 +9,7 @@ import {
 import { TbCategory2 } from "react-icons/tb";
 import { TiFlowChildren } from "react-icons/ti";
 import { LuGitPullRequestArrow } from "react-icons/lu";
+import { IoPaperPlaneOutline } from "react-icons/io5";
 
 interface SidebarProps {
   isCollapsed: boolean;
@@ -56,7 +57,11 @@ const AdminSidebarDashboard = ({
       icon: TiFlowChildren,
       path: "/admin/dashboard/sub-category",
     },
-    // { name: "Support", icon: MessageSquare, path: "/admin/messages" },
+    {
+      name: "Subscription",
+      icon: IoPaperPlaneOutline ,
+      path: "/admin/dashboard/subscription",
+    },
   ];
 
   const activeClass = "bg-[#0064AE] text-white shadow-lg shadow-[#0064AE]/20";

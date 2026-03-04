@@ -46,8 +46,10 @@ export default function LoginPage() {
           }
         } else if (role === "USER") {
           navigate("/");
+        } else if (role === "ADMIN") {
+          navigate("/admin/dashboard");
         } else {
-          navigate("/dashboard");
+          navigate("/login");
         }
       }
     } catch (err: any) {
