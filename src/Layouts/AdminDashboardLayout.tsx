@@ -3,11 +3,12 @@ import { Outlet } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import AdminSidebarDashboard from "@/main/admin/_components/AdminSidebarDashboard";
 import AdminNavbarDashboard from "@/main/admin/_components/AdminNavbarDashboard";
-
+import { useGetMeQuery } from "@/redux/fetures/users.api";
 
 const AdminDashboardLayout = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const { data: userData } = useGetMeQuery();
 
   return (
     <div className="min-h-screen bg-[#F4F7FA] flex font-sans text-slate-900 overflow-hidden">
@@ -17,12 +18,16 @@ const AdminDashboardLayout = () => {
         setIsCollapsed={setIsCollapsed}
         isMobileOpen={isMobileOpen}
         setIsMobileOpen={setIsMobileOpen}
+        userData={userData.data}
       />
 
       {/* --- Main Content Area --- */}
       <div className="flex-1 flex flex-col min-w-0 h-screen transition-all duration-300 overflow-hidden">
         {/* Navbar - Pass Mobile Toggle Function */}
-        <AdminNavbarDashboard setIsMobileOpen={setIsMobileOpen} />
+        <AdminNavbarDashboard
+          userData={userData.data}
+          setIsMobileOpen={setIsMobileOpen}
+        />
 
         {/* Dynamic Content Scroll Area */}
         <main className="flex-1 overflow-y-auto  custom-scrollbar">

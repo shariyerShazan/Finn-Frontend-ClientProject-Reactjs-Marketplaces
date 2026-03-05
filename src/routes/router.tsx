@@ -4,7 +4,7 @@ import SignUp from "../AuthLayout/SignUp/SignUp";
 import Login from "../AuthLayout/Login/Login";
 import RegistrationDone from "../AuthLayout/RegistrationDone/RegistrationDone";
 import UserDashboardLayout from "../Layouts/UserDashboardLayout";
-import UserProfile from "../UserDashboard/UserProfile/UserProfile";
+// import UserProfile from "../UserDashboard/UserProfile/UserProfile";
 // import UserChatbox from "../UserDashboard/UserChatbox/UserChatbox";
 import ChangePassword from "../UserDashboard/ChangePassword/ChangePassword";
 import SellerDetails from "../AuthLayout/SellerDetails/SellerDetails";
@@ -39,6 +39,8 @@ import UserChat from "@/main/user/Pages/chats/UserChat";
 import SellerRequests from "@/main/admin/pages/seller-request/SellerRequests";
 import Subscription from "@/main/admin/pages/subscription/Subscription";
 import SellerSubscriptionPage from "@/main/seller/pages/subscription/SellerSubscriptionPage";
+import Profile from "@/main/user/Pages/profile/Profile";
+import PrivateRoute from "./PrivateRoute";
 
 export const router = createBrowserRouter([
   {
@@ -93,33 +95,41 @@ export const router = createBrowserRouter([
       },
 
       // if the role is user then show user dashboard layout after login or signup ..............User Dashboard Routes
+    ],
+  },
+  {
+    path: "user/dashboard",
+    element: (
+      <PrivateRoute allowedRoles={["USER"]}>
+        <UserDashboardLayout />
+      </PrivateRoute>
+    ),
+    children: [
       {
-        path: "user/dashboard",
-        element: <UserDashboardLayout />,
-        children: [
-          {
-            index: true,
-            element: <UserProfile />,
-          },
-          {
-            path: "chat",
-            element: <UserChat />,
-          },
-          {
-            path: "change-password",
-            element: <ChangePassword />,
-          },
-          {
-            path: "my-purchases",
-            element: <SellerPurchases />,
-          },
-        ],
+        index: true,
+        element: <Profile />,
+      },
+      {
+        path: "chat",
+        element: <UserChat />,
+      },
+      {
+        path: "change-password",
+        element: <ChangePassword />,
+      },
+      {
+        path: "my-purchases",
+        element: <SellerPurchases />,
       },
     ],
   },
   {
     path: "admin/dashboard",
-    element: <AdminDashboardLayout />,
+    element: (
+      <PrivateRoute allowedRoles={["ADMIN"]}>
+        <AdminDashboardLayout />
+      </PrivateRoute>
+    ),
     children: [
       {
         index: true,
@@ -167,13 +177,17 @@ export const router = createBrowserRouter([
       },
       {
         path: "subscription",
-        element: <Subscription />
+        element: <Subscription />,
       },
     ],
   },
   {
     path: "seller/dashboard",
-    element: <SellerDashboardLayout />,
+    element: (
+      <PrivateRoute allowedRoles={["SELLER"]}>
+        <SellerDashboardLayout />
+      </PrivateRoute>
+    ),
     children: [
       {
         index: true,
@@ -201,8 +215,12 @@ export const router = createBrowserRouter([
       // },
       {
         path: "subscription",
-        element: <SellerSubscriptionPage />
-      }
+        element: <SellerSubscriptionPage />,
+      },
+      {
+        path: "profile",
+        element: <Profile />,
+      },
     ],
   },
 ]);

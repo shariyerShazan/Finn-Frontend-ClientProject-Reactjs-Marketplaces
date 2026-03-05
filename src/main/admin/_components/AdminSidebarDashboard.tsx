@@ -1,21 +1,27 @@
-import { Link, useLocation } from "react-router-dom";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
   Users,
   CreditCard,
   ShieldCheck,
   ChevronLeft,
+  Loader2,
+  LogOut,
 } from "lucide-react";
 import { TbCategory2 } from "react-icons/tb";
 import { TiFlowChildren } from "react-icons/ti";
 import { LuGitPullRequestArrow } from "react-icons/lu";
 import { IoPaperPlaneOutline } from "react-icons/io5";
+import { useLogoutMutation } from "@/redux/fetures/auth.api";
+import { toast } from "react-toastify";
 
 interface SidebarProps {
   isCollapsed: boolean;
   setIsCollapsed: (val: boolean) => void;
   isMobileOpen: boolean;
   setIsMobileOpen: (val: boolean) => void;
+  userData: any
 }
 
 const AdminSidebarDashboard = ({
@@ -23,8 +29,21 @@ const AdminSidebarDashboard = ({
   setIsCollapsed,
   isMobileOpen,
   setIsMobileOpen,
+  userData,
 }: SidebarProps) => {
-  const { pathname } = useLocation();
+      const navigate = useNavigate();
+      const { pathname } = useLocation();
+      const [logout, { isLoading: isLoggingOut }] = useLogoutMutation();
+      const handleLogout = async () => {
+        try {
+          await logout(undefined).unwrap();
+          toast.success("Logged out successfully");
+          navigate("/login");
+        } catch (err) {
+          console.log(err);
+          toast.error("Failed to logout");
+        }
+      };
 
   const menuItems = [
     { name: "Overview", icon: LayoutDashboard, path: "/admin/dashboard" },
@@ -59,7 +78,7 @@ const AdminSidebarDashboard = ({
     },
     {
       name: "Subscription",
-      icon: IoPaperPlaneOutline ,
+      icon: IoPaperPlaneOutline,
       path: "/admin/dashboard/subscription",
     },
   ];
@@ -78,16 +97,18 @@ const AdminSidebarDashboard = ({
       {/* Header & Collapse Toggle */}
       <div className="h-16 flex items-center justify-between px-6 border-b border-white/5 bg-[#00152b]">
         {!isCollapsed && (
-          <div className="flex items-center gap-3">
-            <div className="w-7 h-7 bg-[#0064AE] rounded flex items-center justify-center">
-              <span className="text-white font-bold text-xs uppercase italic">
-                F
-              </span>
+          <Link to={"/"}>
+            <div className="flex items-center gap-3">
+              <div className="w-7 h-7 bg-[#0064AE] rounded flex items-center justify-center">
+                <span className="text-white font-bold text-xs uppercase italic">
+                  F
+                </span>
+              </div>
+              <h1 className="text-sm font-black text-white uppercase tracking-widest">
+                Finn Admin
+              </h1>
             </div>
-            <h1 className="text-sm font-black text-white uppercase tracking-widest">
-              Finn Admin
-            </h1>
-          </div>
+          </Link>
         )}
         <button
           onClick={() => setIsCollapsed(!isCollapsed)}
@@ -145,14 +166,38 @@ const AdminSidebarDashboard = ({
           {!isCollapsed && (
             <div className="overflow-hidden">
               <p className="text-xs font-bold text-white truncate">
-                Annette Black
+                {userData.nickName}
               </p>
               <p className="text-[10px] text-slate-500 uppercase tracking-tighter">
-                Super Admin
+                {userData.role}
               </p>
             </div>
           )}
         </div>
+      </div>
+
+      <div className="px-3 mt-2 pb-4">
+        <button
+          onClick={handleLogout}
+          disabled={isLoggingOut}
+          className={`
+        w-full flex items-center gap-3 p-2.5 rounded-lg transition-all
+        text-rose-400 hover:bg-rose-500/10 hover:text-rose-300 cursor-pointer
+        ${isCollapsed ? "justify-center" : "px-3"}
+      `}
+        >
+          {isLoggingOut ? (
+            <Loader2 size={18} className="animate-spin" />
+          ) : (
+            <LogOut size={18} className="shrink-0" />
+          )}
+
+          {!isCollapsed && (
+            <span className="text-[13px] font-bold uppercase tracking-wider">
+              Logout
+            </span>
+          )}
+        </button>
       </div>
     </div>
   );

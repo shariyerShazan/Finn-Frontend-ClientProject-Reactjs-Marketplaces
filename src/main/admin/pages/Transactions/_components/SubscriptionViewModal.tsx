@@ -1,143 +1,136 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// import React from "react";
 import {
   Dialog,
   DialogContent,
-//   DialogHeader,
-//   DialogTitle,
+  DialogHeader,
+  DialogTitle,
 } from "@/components/ui/dialog";
 import {
-//   CheckCircle2,
+  CheckCircle2,
   Calendar,
-  Hash,
-  User,
   CreditCard,
-  Clock,
-  ArrowUpRight,
+  User,
+  Package,
 } from "lucide-react";
 
-const SubscriptionViewModal = ({ isOpen, onClose, data }: any) => {
-  if (!data) return null;
+interface Props {
+  isOpen: boolean;
+  onClose: () => void;
+  transaction: any;
+}
 
-  const { plan, seller, transactionId, createdAt, endDate, status } = data;
+const SubscriptionViewModal = ({ isOpen, onClose, transaction }: Props) => {
+  if (!transaction) return null;
+
+ const detailItem = (icon: any, label: string, value: string) => (
+   <div className="flex items-start gap-3 p-3 rounded-lg bg-slate-50 border border-slate-100 min-w-0">
+     {" "}
+     <div className="p-2 bg-white rounded-md shadow-sm text-[#0064AE] shrink-0">
+       {" "}
+       {icon}
+     </div>
+     <div className="min-w-0 flex-1">
+       {" "}
+       <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+         {label}
+       </p>
+       <p className="text-sm font-bold text-slate-800 break-all leading-tight">
+         {" "}
+         {value}
+       </p>
+     </div>
+   </div>
+ );
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[500px] rounded-3xl p-0 overflow-hidden border-none shadow-2xl">
-        {/* Header Section with Brand Gradient */}
-        <div className="bg-gradient-to-br from-[#0064AE] to-[#003d6b] p-8 text-white relative">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2 text-blue-100 text-[10px] font-black uppercase tracking-[2px]">
-              <CreditCard size={12} />
-              <span>Payment Receipt</span>
-            </div>
-            <h2 className="text-3xl font-black">{plan?.name} Plan</h2>
+      <DialogContent className="max-w-md bg-white rounded-[24px] p-6 border-none shadow-2xl">
+        <DialogHeader>
+          <div className="flex items-center gap-2 mb-2">
+            <div className="w-2 h-6 bg-[#0064AE] rounded-full" />
+            <DialogTitle className="text-xl font-black text-slate-900 uppercase tracking-tight">
+              Transaction Details
+            </DialogTitle>
           </div>
+        </DialogHeader>
 
-          <div className="absolute top-8 right-8 text-right">
-            <p className="text-xs font-bold text-blue-200 uppercase tracking-tighter">
-              Amount Paid
-            </p>
-            <p className="text-3xl font-black">{plan?.price} PLN</p>
-          </div>
-        </div>
-
-        {/* Content Section */}
-        <div className="p-8 space-y-6 bg-white">
-          {/* Transaction Summary Grid */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
-              <div className="flex items-center gap-2 mb-1 text-slate-400">
-                <Hash size={14} />
-                <span className="text-[10px] font-black uppercase">
-                  Transaction ID
-                </span>
-              </div>
-              <p className="text-xs font-bold text-slate-700 break-all">
-                {transactionId?.slice(0, 18)}...
-              </p>
-            </div>
-
-            <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
-              <div className="flex items-center gap-2 mb-1 text-slate-400">
-                <Clock size={14} />
-                <span className="text-[10px] font-black uppercase">
-                  Payment Date
-                </span>
-              </div>
-              <p className="text-xs font-bold text-slate-700">
-                {new Date(createdAt).toLocaleDateString()}
-              </p>
-            </div>
-          </div>
-
-          {/* User Details Section */}
-          <div className="space-y-3">
-            <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-              <User size={12} /> Seller Information
-            </h4>
-            <div className="flex items-center justify-between p-4 border border-slate-100 rounded-2xl">
+        <div className="space-y-4 mt-4">
+          {/* Status Banner */}
+          <div className="flex items-center justify-between p-4 bg-emerald-50 rounded-2xl border border-emerald-100">
+            <div className="flex items-center gap-3">
+              <CheckCircle2 className="text-emerald-600" size={24} />
               <div>
-                <p className="text-sm font-bold text-slate-800">
-                  {seller?.firstName} {seller?.lastName}
+                <p className="text-xs font-black text-emerald-800 uppercase">
+                  Payment Status
                 </p>
-                <p className="text-xs text-slate-500">{seller?.email}</p>
+                <p className="text-sm font-bold text-emerald-600">
+                  {transaction.paymentStatus}
+                </p>
               </div>
+            </div>
+            <span className="bg-emerald-600 text-white text-[10px] font-black px-3 py-1 rounded-full uppercase">
+              {transaction.status}
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 gap-3">
+            {detailItem(
+              <User size={18} />,
+              "Seller Info",
+              `${transaction.seller.firstName} ${transaction.seller.lastName}`,
+            )}
+
+            {detailItem(
+              <CreditCard size={18} />,
+              "Transaction ID",
+              transaction.transactionId,
+            )}
+
+            <div className="grid grid-cols-2 gap-3">
+              {detailItem(
+                <Package size={18} />,
+                "Plan Name",
+                transaction.plan.name,
+              )}
+              {detailItem(
+                <Calendar size={18} />,
+                "Plan Price",
+                `${transaction.plan.price} PLN`,
+              )}
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              {detailItem(
+                <Calendar size={18} />,
+                "Start Date",
+                new Date(transaction.startDate).toLocaleDateString(),
+              )}
+              {detailItem(
+                <Calendar size={18} />,
+                "End Date",
+                new Date(transaction.endDate).toLocaleDateString(),
+              )}
+            </div>
+          </div>
+
+          <div className="p-4 bg-blue-50/50 rounded-2xl border border-blue-100 flex justify-between items-center">
+            <div>
+              <p className="text-[10px] font-black text-blue-400 uppercase tracking-widest">
+                Post Usage
+              </p>
+              <p className="text-sm font-black text-[#0064AE]">
+                {transaction.usedAdIds.length} / {transaction.totalLimit} Posts
+              </p>
+            </div>
+            <div className="w-16 h-1 bg-blue-100 rounded-full overflow-hidden">
               <div
-                className={`px-3 py-1 rounded-full text-[10px] font-black ${
-                  status === "COMPLETED" || status === "ACTIVE"
-                    ? "bg-emerald-50 text-emerald-600"
-                    : "bg-amber-50 text-amber-600"
-                }`}
-              >
-                {status}
-              </div>
+                className="h-full bg-[#0064AE]"
+                style={{
+                  width: `${(transaction.usedAdIds.length / transaction.totalLimit) * 100}%`,
+                }}
+              />
             </div>
           </div>
-
-          {/* Subscription Validity Section */}
-          <div className="space-y-4 pt-2">
-            <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest border-b pb-2">
-              Plan Entitlements
-            </h4>
-            <div className="grid grid-cols-1 gap-3">
-              <div className="flex items-center justify-between group">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-blue-50 text-[#0064AE] rounded-lg">
-                    <Calendar size={16} />
-                  </div>
-                  <span className="text-sm font-bold text-slate-600">
-                    Access Until
-                  </span>
-                </div>
-                <span className="text-sm font-black text-slate-800">
-                  {new Date(endDate).toLocaleDateString()}
-                </span>
-              </div>
-
-              <div className="flex items-center justify-between group">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-blue-50 text-[#0064AE] rounded-lg">
-                    <ArrowUpRight size={16} />
-                  </div>
-                  <span className="text-sm font-bold text-slate-600">
-                    Total Ad Limit
-                  </span>
-                </div>
-                <span className="text-sm font-black text-slate-800">
-                  {plan?.postLimit} Posts
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Footer Close Button */}
-          <button
-            onClick={onClose}
-            className="w-full py-4 mt-4 bg-slate-900 text-white font-black rounded-2xl hover:bg-slate-800 transition-all shadow-lg text-sm uppercase tracking-widest"
-          >
-            Close Receipt
-          </button>
         </div>
       </DialogContent>
     </Dialog>

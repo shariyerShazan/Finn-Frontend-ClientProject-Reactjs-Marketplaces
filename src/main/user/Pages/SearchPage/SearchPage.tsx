@@ -1,6 +1,7 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   LayoutGrid,
   Map as MapIcon,
@@ -11,20 +12,32 @@ import FilterSearch from "./_components/FilterSearch";
 import AdCard from "../HomePage/_components/AdCard";
 import CommonPagination from "../../_components/CommonPagination";
 import { useGetAllAdsQuery } from "@/redux/fetures/ads.api";
+import { useSearchParams } from "react-router-dom";
 
 const SearchPage = () => {
+  const [searchParams] = useSearchParams();
   const [viewMode, setViewMode] = useState<"grid" | "map">("grid");
+  const initialSearch = searchParams.get("search") || "";
+  const initialCategory = searchParams.get("category") || "all";
+
   const [filters, setFilters] = useState({
-    search: "",
+    search: initialSearch,
     isSold: "false",
     sortByPrice: "asc" as "asc" | "desc",
-    category: "",
-    subCategory: "",
+    category: initialCategory,
+    subCategory: "all",
     page: 1,
     limit: 12,
   });
+  useEffect(() => {
+    setFilters((prev) => ({
+      ...prev,
+      search: searchParams.get("search") || "",
+      category: searchParams.get("category") || "all",
+      page: 1,
+    }));
+  }, [searchParams]);
 
-  // 🚀 RTK Query: Sending all filters to backend
   const { data, isLoading, isFetching } = useGetAllAdsQuery({
     page: filters.page,
     limit: filters.limit,
@@ -37,8 +50,6 @@ const SearchPage = () => {
 
   const ads = data?.data || [];
   const meta = data?.meta || { total: 0, page: 1, limit: 12 };
-
-  // Calculate total pages based on backend meta
   const totalPages = Math.ceil(meta.total / meta.limit) || 1;
 
   return (

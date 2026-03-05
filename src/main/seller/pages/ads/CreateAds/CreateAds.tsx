@@ -71,7 +71,12 @@ const CreateAds = () => {
     23.8103, 90.4125,
   ]);
 
-  const { data: categories = [] } = useGetAllCategoriesQuery();
+  const { data: categoriesResponse} =
+    useGetAllCategoriesQuery({
+      page: 1,
+      limit: 1000, 
+    });
+    const categories = categoriesResponse?.data || [];
   const { data: categoryDetails } = useGetSingleCategoryQuery(selectedCatId, {
     skip: !selectedCatId,
   });

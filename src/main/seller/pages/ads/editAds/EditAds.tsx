@@ -54,8 +54,11 @@ const SellerEditAds = () => {
 
   // API Hooks
   const { data: adDetails, isLoading: isAdLoading } = useGetSingleMyAdQuery(id);
-  const { data: categoriesData } = useGetAllCategoriesQuery();
-  const categories = categoriesData || [];
+  const { data: categoriesData } = useGetAllCategoriesQuery({
+    page: 1,
+    limit: 1000,
+  });
+     const categories = categoriesData?.data || [];
 
   const { data: categoryDetails } = useGetSingleCategoryQuery(selectedCatId, {
     skip: !selectedCatId,

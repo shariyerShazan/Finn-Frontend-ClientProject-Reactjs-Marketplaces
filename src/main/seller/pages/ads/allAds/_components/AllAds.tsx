@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, Search, Eye, Edit, Trash2, Filter, Loader2 } from "lucide-react";
+import { Plus, Search, Eye, Edit, Trash2, Filter, Loader2, RotateCcw, CheckCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
   Select,
@@ -18,9 +18,10 @@ import CommonPagination from "@/main/user/_components/CommonPagination";
 import { useNavigate } from "react-router";
 // import { toast } from "react-toastify";
 import Swal from "sweetalert2";
-import { useDeleteAdMutation } from "@/redux/fetures/ads.api"; // delete ad common hote pare
+import { useDeleteAdMutation, useToggleSoldStatusMutation } from "@/redux/fetures/ads.api"; // delete ad common hote pare
 import { useGetMyAdsQuery } from "@/redux/fetures/users.api";
 import ViewAdDialog from "./ViewAdDialogProps";
+import { toast } from "react-toastify";
 
 interface AdData {
   id: string;
@@ -56,6 +57,42 @@ const AllAds = () => {
   });
 console.log(data, "ok");
   const [deleteAd] = useDeleteAdMutation();
+const [toggleSold] = useToggleSoldStatusMutation();
+
+const handleToggleSold = async (adId: string, currentStatus: boolean) => {
+  const result = await Swal.fire({
+    title: "Are you sure?",
+    text: currentStatus
+      ? "Do you want to mark this item as AVAILABLE?"
+      : "Do you want to mark this item as SOLD?",
+    icon: "question",
+    showCancelButton: true,
+    confirmButtonColor: currentStatus ? "#0064AE" : "#10b981", // Available হলে Blue, Sold হলে Green
+    cancelButtonColor: "#64748b",
+    confirmButtonText: currentStatus
+      ? "Yes, make it available!"
+      : "Yes, mark as sold!",
+    background: "#fff",
+    customClass: {
+      popup: "rounded-[24px]",
+      confirmButton:
+        "rounded-xl px-6 py-2.5 text-xs font-black uppercase tracking-widest",
+      cancelButton:
+        "rounded-xl px-6 py-2.5 text-xs font-black uppercase tracking-widest",
+    },
+  });
+
+  if (result.isConfirmed) {
+    try {
+      const res = await toggleSold(adId).unwrap();
+      if (res.success) {
+        toast.success(res.message);
+      }
+    } catch (error: any) {
+      toast.error(error?.data?.message || "Failed to update status");
+    }
+  }
+};
 
   // Data structure according to your NestJS backend response
   const adsList = (data as any)?.data || [];
@@ -195,6 +232,17 @@ const columns: Column<AdData>[] = [
     header: "Action",
     render: (item) => (
       <div className="flex items-center gap-2">
+        <button
+          onClick={() => handleToggleSold(item.id, item.isSold)}
+          title={item.isSold ? "Mark as Available" : "Mark as Sold"}
+          className={`p-2 border rounded-xl transition-all cursor-pointer shadow-sm ${
+            item.isSold
+              ? "text-amber-500 border-amber-100 hover:bg-amber-50"
+              : "text-emerald-500 border-emerald-100 hover:bg-emerald-50"
+          }`}
+        >
+          {item.isSold ? <RotateCcw size={16} /> : <CheckCircle size={16} />}
+        </button>
         <button
           onClick={() => handleOpenView(item)}
           title="View Details"

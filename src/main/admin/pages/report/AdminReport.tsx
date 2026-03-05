@@ -79,7 +79,7 @@ const AdminReport = () => {
             <img
               src={
                 item?.reporter.profilePicture ||
-                `https://api.dicebear.com/7.x/initials/svg?seed=${item.nickName}`
+                `https://api.dicebear.com/7.x/initials/svg?seed=${item?.reporter.nickName}`
               }
               className="w-10 h-10 rounded-xl object-cover border border-slate-100"
             />

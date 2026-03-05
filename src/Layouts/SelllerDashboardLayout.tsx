@@ -37,16 +37,16 @@ const SellerDashboardLayout = () => {
         setIsCollapsed={setIsCollapsed}
         isMobileOpen={isMobileOpen}
         setIsMobileOpen={setIsMobileOpen}
+        userData={userData.data}
       />
 
       <div className="flex-1 flex flex-col min-w-0 h-screen transition-all duration-300 overflow-hidden">
-        <SellerNavbarD setIsMobileOpen={setIsMobileOpen} />
+        <SellerNavbarD userData={userData.data} setIsMobileOpen={setIsMobileOpen} />
 
         <main className="flex-1 overflow-y-auto custom-scrollbar">
           <div
             className={`ml-0 duration-500 transition-all mx-auto ${isCollapsed ? "lg:ml-20" : "lg:ml-65"}`}
           >
-
             {isSellerApproved ? (
               <Outlet />
             ) : (

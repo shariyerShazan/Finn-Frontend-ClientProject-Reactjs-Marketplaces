@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
-import { Mail, Loader2 } from "lucide-react";
+import {  Loader2 } from "lucide-react";
 // import { useLoginMutation } from "@/redux/api/authApi";
 // import { LoginRequest } from "@/redux/api/types/auth";
 // import { toast } from "sonner"; // Assuming you use Sonner for notifications
@@ -69,13 +69,10 @@ export default function LoginPage() {
   const handleGoogleLogin = () => {
     toast.warn("Comming soon!");
   };
-  const handleEmailLogin = () => {
-    toast.warn("Comming soon!");
-  };
 
   return (
     <div className="min-h-[80vh] ">
-      <main className="max-w-6xl mx-auto   px-4 grid md:grid-cols-2 gap-8 items-start">
+      <main className="max-w-6xl mx-auto   px-4 grid md:grid-cols-2 gap-8 items-center">
         {/* Left Side: Hero Image */}
         <div className="rounded-3xl overflow-hidden shadow-sm hidden md:block">
           <img
@@ -200,14 +197,6 @@ export default function LoginPage() {
                 Continue with Google
               </Button>
 
-              <Button
-                onClick={handleEmailLogin}
-                variant="outline"
-                className="w-full py-7 bg-zinc-100 border-none rounded-2xl flex gap-3 text-zinc-800 font-medium hover:bg-zinc-200"
-              >
-                <Mail className="w-5 h-5 text-zinc-600" />
-                Continue with Email
-              </Button>
             </div>
 
             <p className="text-center text-zinc-500 mt-8 text-sm">

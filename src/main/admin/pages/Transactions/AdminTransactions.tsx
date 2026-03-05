@@ -27,7 +27,7 @@ const AdminTransactions = () => {
   // --- API Integration ---
   const { data: response} = useGetAllPaymentHistoryQuery(undefined);
   const transactions = response?.data || [];
-
+console.log(response);
   // --- PDF Generator Function ---
   const handleDownloadPDF = (item: any) => {
     const doc = new jsPDF();
@@ -196,10 +196,7 @@ const AdminTransactions = () => {
 
         {/* Main Table */}
         <div className="overflow-hidden rounded-2xl border border-slate-100">
-          <CommonTable
-            columns={columns}
-            data={filteredData}
-          />
+          <CommonTable columns={columns} data={filteredData} />
         </div>
 
         {/* Pagination Footer */}
@@ -216,7 +213,7 @@ const AdminTransactions = () => {
       <SubscriptionViewModal
         isOpen={isViewOpen}
         onClose={() => setIsViewOpen(false)}
-        plan={selectedTransaction?.plan}
+        transaction={selectedTransaction} 
       />
     </div>
   );
