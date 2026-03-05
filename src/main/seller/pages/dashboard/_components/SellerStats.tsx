@@ -1,6 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { LayoutGrid, CheckCircle2, Eye, Loader2 } from "lucide-react";
-import { MdPayments } from "react-icons/md";
+// import { MdPayments } from "react-icons/md";
 import { useGetSellerStatsQuery } from "@/redux/fetures/users.api";
 
 const SellerStats = () => {
@@ -24,13 +24,13 @@ const SellerStats = () => {
       color: "text-green-600",
       bg: "bg-green-50",
     },
-    {
-      label: `$${(statsData.totalIncome || 0).toLocaleString()}`,
-      subLabel: "Total Income",
-      icon: MdPayments,
-      color: "text-indigo-600",
-      bg: "bg-indigo-50",
-    },
+    // {
+    //   label: `$${(statsData.totalIncome || 0).toLocaleString()}`,
+    //   subLabel: "Total Income",
+    //   icon: MdPayments,
+    //   color: "text-indigo-600",
+    //   bg: "bg-indigo-50",
+    // },
     {
       label: statsData.itemSold || 0,
       subLabel: "Item Sold",
