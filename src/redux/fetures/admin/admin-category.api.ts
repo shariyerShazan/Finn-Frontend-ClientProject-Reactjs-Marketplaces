@@ -4,8 +4,22 @@ import { baseApi } from "@/redux/api/baseApi";
 export const adminCategoryApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     // --- Category Endpoints ---
-    getAllCategories: builder.query<any, void>({
-      query: () => "/categories",
+    // --- Category Endpoints ---
+    getAllCategories: builder.query<
+      any,
+      { page?: number; limit?: number; search?: string } | void
+    >({
+      query: (params) => {
+        const queryParams = new URLSearchParams();
+        if (params?.page) queryParams.append("page", params.page.toString());
+        if (params?.limit) queryParams.append("limit", params.limit.toString());
+        if (params?.search) queryParams.append("search", params.search);
+
+        return {
+          url: `/categories?${queryParams.toString()}`,
+          method: "GET",
+        };
+      },
       providesTags: ["Category"],
     }),
 

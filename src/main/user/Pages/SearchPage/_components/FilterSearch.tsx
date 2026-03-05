@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-import React  from "react";
+import React from "react";
 import {
   Search,
   ArrowUpNarrowWide,
@@ -18,7 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
+// import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import {
   useGetAllCategoriesQuery,
@@ -31,11 +31,13 @@ interface FilterProps {
 }
 
 const FilterSearch = ({ filters, setFilters }: FilterProps) => {
-  // Fetch All Categories for the first dropdown
-  const { data: allCategories = [], isLoading: catLoading } =
-    useGetAllCategoriesQuery();
+  // ১. প্যারামিটার সহ কল করা (ব্যাকএন্ডের নতুন getAllCategories অনুযায়ী)
+  const { data: categoriesResponse, isLoading: catLoading } =
+    useGetAllCategoriesQuery({ page: 1, limit: 100 });
 
-  // Fetch Sub-categories when a category is selected
+  // ২. ডাটা এক্সট্র্যাক্ট করা (এরর হ্যান্ডেলিং সহ)
+  const allCategories = categoriesResponse?.data || [];
+
   const { data: categoryDetails, isFetching: subCatLoading } =
     useGetSingleCategoryQuery(filters.category, {
       skip: !filters.category || filters.category === "all",
@@ -46,7 +48,6 @@ const FilterSearch = ({ filters, setFilters }: FilterProps) => {
   const handleUpdate = (key: string, value: string) => {
     setFilters((prev: any) => {
       const updated = { ...prev, [key]: value, page: 1 };
-      // Logic: Reset sub-category if main category changes
       if (key === "category") updated.subCategory = "all";
       return updated;
     });
@@ -130,6 +131,7 @@ const FilterSearch = ({ filters, setFilters }: FilterProps) => {
               </SelectTrigger>
               <SelectContent className="rounded-xl shadow-2xl border-slate-100">
                 <SelectItem value="all">All Categories</SelectItem>
+                {/* এখানে allCategories এখন নিরাপদ অ্যারে */}
                 {allCategories.map((c: any) => (
                   <SelectItem key={c.id} value={c.id}>
                     {c.name}
@@ -138,7 +140,7 @@ const FilterSearch = ({ filters, setFilters }: FilterProps) => {
               </SelectContent>
             </Select>
 
-            {/* 🏷️ Sub-Category Select (Conditional) */}
+            {/* 🏷️ Sub-Category Select */}
             <div className="relative">
               <Select
                 value={filters.subCategory}
@@ -168,13 +170,6 @@ const FilterSearch = ({ filters, setFilters }: FilterProps) => {
                   ))}
                 </SelectContent>
               </Select>
-              {filters.category &&
-                filters.category !== "all" &&
-                subCategories.length > 0 && (
-                  <Badge className="absolute -top-2 -right-2 bg-[#0064AE] px-1.5 py-0 text-[10px] animate-in zoom-in">
-                    Refined
-                  </Badge>
-                )}
             </div>
           </div>
         </div>

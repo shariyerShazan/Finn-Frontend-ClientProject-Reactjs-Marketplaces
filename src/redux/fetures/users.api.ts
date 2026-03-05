@@ -13,8 +13,6 @@ export const userApi = baseApi.injectEndpoints({
       providesTags: ["User"],
     }),
 
-
-
     // --- CREATE SELLER PROFILE ---
     createSellerProfile: builder.mutation({
       query: (data) => ({
@@ -26,13 +24,13 @@ export const userApi = baseApi.injectEndpoints({
     }),
 
     // --- UPDATE PROFILE (USER/SELLER) ---
-    updateProfile: builder.mutation({
-      query: (data) => ({
+    updateProfile: builder.mutation<any, FormData>({
+      query: (formData) => ({
         url: "/user/update-profile",
         method: "PATCH",
-        body: data,
+        body: formData, 
       }),
-      invalidatesTags: ["User"],
+      invalidatesTags: ["User"], 
     }),
 
     // --- GET SELLER'S OWN ADS ---
@@ -42,7 +40,16 @@ export const userApi = baseApi.injectEndpoints({
         method: "GET",
         params: params, // page, limit, search eikhane jabe
       }),
-      providesTags: ["Ads"],
+      providesTags: (result) =>
+        result?.data
+          ? [
+              ...result.data.map(({ id }: { id: string }) => ({
+                type: "Ad" as const,
+                id,
+              })),
+              { type: "Ad", id: "LIST" },
+            ]
+          : [{ type: "Ad", id: "LIST" }],
     }),
 
     // --- GET SINGLE AD (SELLER) ---
@@ -51,6 +58,7 @@ export const userApi = baseApi.injectEndpoints({
         url: `/user/my-ads/${adId}`,
         method: "GET",
       }),
+      providesTags: ["Ads", "Ad"],
     }),
 
     // --- GET SELLER EARNINGS ---
@@ -84,7 +92,7 @@ export const userApi = baseApi.injectEndpoints({
         url: "/user/seller-stats",
         method: "GET",
       }),
-      providesTags: ["Ads", "User"],
+      providesTags: ["Ad", "Ads", "User"],
     }),
 
     getSellerRecentAds: builder.query<any, { search?: string }>({

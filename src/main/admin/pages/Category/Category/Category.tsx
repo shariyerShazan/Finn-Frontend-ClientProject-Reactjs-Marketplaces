@@ -26,7 +26,13 @@ const Category = () => {
   const [currentPage, setCurrentPage] = useState(1);
 
   // RTK Query Hooks
-  const { data: categories = [], isLoading } = useGetAllCategoriesQuery();
+  const { data: categoriesResponse, isLoading } = useGetAllCategoriesQuery({
+  page: 1, 
+  limit: 1000,
+});
+
+const categories = categoriesResponse?.data || [];
+// const meta = categoriesResponse?.meta;
   const [deleteCategory, { isLoading: isDeleting }] =
     useDeleteCategoryMutation();
 
