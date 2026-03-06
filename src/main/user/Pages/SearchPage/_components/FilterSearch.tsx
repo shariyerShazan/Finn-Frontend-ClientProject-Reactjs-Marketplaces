@@ -70,7 +70,7 @@ const FilterSearch = ({ filters, setFilters }: FilterProps) => {
             />
           </div>
 
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="flex flex-wrap md:flex-nowrap items-center gap-3">
             <Separator
               orientation="vertical"
               className="hidden lg:block h-8 mx-2 bg-slate-200"

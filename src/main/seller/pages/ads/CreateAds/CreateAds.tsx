@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+"use client";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -58,8 +59,8 @@ interface AdFormData {
   showAddress: boolean;
   allowPhone: boolean;
   allowEmail: boolean;
-  latitude: number | null;
-  longitude: number | null;
+  latitude: number;
+  longitude: number;
   [key: `spec_${string}`]: any;
 }
 
@@ -71,12 +72,12 @@ const CreateAds = () => {
     23.8103, 90.4125,
   ]);
 
-  const { data: categoriesResponse} =
-    useGetAllCategoriesQuery({
-      page: 1,
-      limit: 1000, 
-    });
-    const categories = categoriesResponse?.data || [];
+  const { data: categoriesResponse } = useGetAllCategoriesQuery({
+    page: 1,
+    limit: 1000,
+  });
+  const categories = categoriesResponse?.data || [];
+
   const { data: categoryDetails } = useGetSingleCategoryQuery(selectedCatId, {
     skip: !selectedCatId,
   });
@@ -84,29 +85,55 @@ const CreateAds = () => {
 
   const subCategories = categoryDetails?.subCategories || [];
 
-  const { register, handleSubmit, setValue, watch } = useForm<AdFormData>({
-    defaultValues: {
-      type: "FIXED",
-      propertyFor: "SALE",
-      showAddress: true,
-      allowPhone: true,
-      allowEmail: true,
-      country: "Bangladesh",
-      latitude: 23.8103,
-      longitude: 90.4125,
-    },
-  });
+  const { register, handleSubmit, setValue, watch, control } =
+    useForm<AdFormData>({
+      defaultValues: {
+        type: "FIXED",
+        propertyFor: "SALE",
+        showAddress: true,
+        allowPhone: true,
+        allowEmail: true,
+        country: "Bangladesh",
+        latitude: 23.8103,
+        longitude: 90.4125,
+      },
+    });
 
   const [selectedSubCat, setSelectedSubCat] = useState<any>(null);
   const currentLat = watch("latitude");
   const currentLng = watch("longitude");
 
+  // --- Reverse Geocoding Function ---
+  const fetchAddressDetails = async (lat: number, lng: number) => {
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`,
+      );
+      const data = await response.json();
+      if (data && data.address) {
+        const addr = data.address;
+        setValue("country", addr.country || "");
+        setValue("state", addr.state || addr.province || addr.division || "");
+        setValue(
+          "city",
+          addr.city || addr.town || addr.village || addr.suburb || "",
+        );
+        setValue("zipCode", addr.postcode || "");
+        toast.info("Location details updated from map");
+      }
+    } catch (error) {
+      console.error("Geocoding Error:", error);
+    }
+  };
+
   // --- Map Click Logic ---
   function MapClickHandler() {
     useMapEvents({
       click(e) {
-        setValue("latitude", e.latlng.lat);
-        setValue("longitude", e.latlng.lng);
+        const { lat, lng } = e.latlng;
+        setValue("latitude", lat);
+        setValue("longitude", lng);
+        fetchAddressDetails(lat, lng);
       },
     });
     return null;
@@ -115,14 +142,15 @@ const CreateAds = () => {
   const getDeviceLocation = () => {
     if (!navigator.geolocation)
       return toast.error("Geolocation is not supported");
-    toast.info("Fetching device location...");
+    toast.info("Fetching location...");
     navigator.geolocation.getCurrentPosition(
       (position) => {
         const { latitude, longitude } = position.coords;
         setValue("latitude", latitude);
         setValue("longitude", longitude);
         setMapCenter([latitude, longitude]);
-        toast.success("Location updated successfully!");
+        fetchAddressDetails(latitude, longitude);
+        toast.success("Location updated!");
       },
       (error) => toast.error("Error: " + error.message),
     );
@@ -141,51 +169,59 @@ const CreateAds = () => {
     setValue("subCategoryId", id);
   };
 
-  const onSubmit = async (data: AdFormData) => {
-    const formData = new FormData();
-    const standardFields = [
-      "title",
-      "description",
-      "type",
-      "price",
-      "propertyFor",
-      "state",
-      "city",
-      "zipCode",
-      "country",
-      "categoryId",
-      "subCategoryId",
-      "showAddress",
-      "allowPhone",
-      "allowEmail",
-      "latitude",
-      "longitude",
-    ];
+ const onSubmit = async (data: AdFormData) => {
+   const formData = new FormData();
 
-    standardFields.forEach((field) => {
-      if (data[field as keyof AdFormData] !== null) {
-        formData.append(field, String(data[field as keyof AdFormData]));
-      }
-    });
+   const standardFields = [
+     "title",
+     "description",
+     "type",
+     "price",
+     "propertyFor",
+     "state",
+     "city",
+     "zipCode",
+     "country",
+     "categoryId",
+     "subCategoryId",
+     "latitude",
+     "longitude",
+   ];
 
-    // Specifications Logic (Based on subCategory)
-    const specs: Record<string, any> = {};
-    selectedSubCat?.specFields?.forEach((f: any) => {
-      const val = data[`spec_${f.key}`];
-      if (val) specs[f.key] = f.type === "number" ? Number(val) : val;
-    });
-    formData.append("specifications", JSON.stringify(specs));
+   standardFields.forEach((field) => {
+     const value = data[field as keyof AdFormData];
+     if (value !== undefined && value !== null) {
+       formData.append(field, String(value));
+     }
+   });
+console.log(data.showAddress);
+console.log(data.allowPhone);
+console.log(data.allowEmail);
+   formData.append("showAddress", data.showAddress ? "true" : "false");
+   formData.append("allowPhone", data.allowPhone ? "true" : "false");
+   formData.append("allowEmail", data.allowEmail ? "true" : "false");
 
-    images.forEach((file) => formData.append("images", file));
+   // Specifications
+   const specs: Record<string, any> = {};
+   selectedSubCat?.specFields?.forEach((f: any) => {
+     const val = data[`spec_${f.key}`];
+     if (val !== undefined && val !== "") {
+       specs[f.key] = f.type === "number" ? Number(val) : val;
+     }
+   });
+   formData.append("specifications", JSON.stringify(specs));
 
-    try {
-      await createAd(formData).unwrap();
-      toast.success("Ad posted successfully!");
-      navigate("/seller/dashboard/all-ads");
-    } catch (err: any) {
-      toast.error(err?.data?.message || "Failed to post ad");
-    }
-  };
+   // Images
+   images.forEach((file) => formData.append("images", file));
+
+   try {
+     await createAd(formData).unwrap();
+     toast.success("Ad posted successfully!");
+     navigate("/seller/dashboard/all-ads");
+   } catch (err: any) {
+     toast.error(err?.data?.message || "Failed to post ad");
+   }
+ };
 
   return (
     <div className="p-4 mx-auto space-y-8 ">
@@ -211,7 +247,7 @@ const CreateAds = () => {
                   <div className="space-y-2">
                     <Label>Category *</Label>
                     <Select onValueChange={handleCategoryChange}>
-                      <SelectTrigger className="w-full">
+                      <SelectTrigger>
                         <SelectValue placeholder="Select" />
                       </SelectTrigger>
                       <SelectContent>
@@ -229,7 +265,7 @@ const CreateAds = () => {
                       onValueChange={handleSubCategoryChange}
                       disabled={!subCategories.length}
                     >
-                      <SelectTrigger className="w-full">
+                      <SelectTrigger>
                         <SelectValue placeholder="Select" />
                       </SelectTrigger>
                       <SelectContent>
@@ -254,7 +290,7 @@ const CreateAds = () => {
                       onValueChange={(v) => setValue("propertyFor", v)}
                       defaultValue="SALE"
                     >
-                      <SelectTrigger className="w-full">
+                      <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -276,7 +312,6 @@ const CreateAds = () => {
               </CardContent>
             </Card>
 
-            {/* RESTORED: Dynamic Specs based on SubCategory */}
             {selectedSubCat?.specFields?.length > 0 && (
               <Card className="bg-slate-50 border-dashed">
                 <CardHeader>
@@ -297,7 +332,7 @@ const CreateAds = () => {
                             setValue(`spec_${field.key}`, v)
                           }
                         >
-                          <SelectTrigger className="bg-white w-full">
+                          <SelectTrigger className="bg-white">
                             <SelectValue placeholder="Choose" />
                           </SelectTrigger>
                           <SelectContent>
@@ -351,11 +386,10 @@ const CreateAds = () => {
                   onClick={getDeviceLocation}
                   className="text-xs h-8"
                 >
-                  <Crosshair size={14} className="mr-1" /> Get My Location
+                  <Crosshair size={14} className="mr-1" /> My Location
                 </Button>
               </CardHeader>
               <CardContent className="space-y-4">
-                {/* --- Leaflet Map Integrated into your card --- */}
                 <div className="h-[200px] w-full rounded-md overflow-hidden border">
                   <MapContainer
                     center={mapCenter}
@@ -364,7 +398,7 @@ const CreateAds = () => {
                   >
                     <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
                     <Marker
-                      position={[currentLat || 23.8103, currentLng || 90.4125]}
+                      position={[currentLat, currentLng]}
                       icon={customIcon}
                       draggable={true}
                       eventHandlers={{
@@ -372,16 +406,12 @@ const CreateAds = () => {
                           const pos = e.target.getLatLng();
                           setValue("latitude", pos.lat);
                           setValue("longitude", pos.lng);
+                          fetchAddressDetails(pos.lat, pos.lng);
                         },
                       }}
                     />
                     <MapClickHandler />
                   </MapContainer>
-                </div>
-
-                <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground bg-slate-50 p-2 rounded">
-                  <div>Lat: {currentLat?.toFixed(4) || "N/A"}</div>
-                  <div>Lng: {currentLng?.toFixed(4) || "N/A"}</div>
                 </div>
                 <div className="space-y-2">
                   <Label>Country</Label>
@@ -410,22 +440,45 @@ const CreateAds = () => {
                 <CardTitle className="text-lg">Privacy</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {[
-                  { label: "Show Address", name: "showAddress" as const },
-                  { label: "Allow Phone", name: "allowPhone" as const },
-                  { label: "Allow Email", name: "allowEmail" as const },
-                ].map((item) => (
-                  <div
-                    key={item.name}
-                    className="flex items-center justify-between"
-                  >
-                    <Label>{item.label}</Label>
-                    <Switch
-                      checked={watch(item.name)}
-                      onCheckedChange={(val) => setValue(item.name, val)}
-                    />
-                  </div>
-                ))}
+                <div className="flex items-center justify-between">
+                  <Label>Show Address</Label>
+                  <Controller
+                    name="showAddress"
+                    control={control}
+                    render={({ field }) => (
+                      <Switch
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    )}
+                  />
+                </div>
+                <div className="flex items-center justify-between">
+                  <Label>Allow Phone</Label>
+                  <Controller
+                    name="allowPhone"
+                    control={control}
+                    render={({ field }) => (
+                      <Switch
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    )}
+                  />
+                </div>
+                <div className="flex items-center justify-between">
+                  <Label>Allow Email</Label>
+                  <Controller
+                    name="allowEmail"
+                    control={control}
+                    render={({ field }) => (
+                      <Switch
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    )}
+                  />
+                </div>
               </CardContent>
             </Card>
 
@@ -443,7 +496,7 @@ const CreateAds = () => {
                       <img
                         src={URL.createObjectURL(img)}
                         className="w-full h-full object-cover"
-                        alt="Ad preview"
+                        alt="Preview"
                       />
                       <button
                         type="button"
