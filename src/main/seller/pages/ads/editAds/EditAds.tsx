@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+"use client";
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useForm, Controller } from "react-hook-form";
@@ -16,8 +17,16 @@ import {
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "react-toastify";
-import { Loader2, Upload, X, MapPin, Crosshair } from "lucide-react";
+import {
+  Loader2,
+  Upload,
+  X,
+  MapPin,
+  Crosshair,
+  ShieldCheck,
+} from "lucide-react";
 
+// --- Leaflet Imports ---
 import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -39,7 +48,6 @@ const SellerEditAds = () => {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  // States
   const [newImages, setNewImages] = useState<File[]>([]);
   const [existingImages, setExistingImages] = useState<any[]>([]);
   const [deletedImageIds, setDeletedImageIds] = useState<string[]>([]);
@@ -52,13 +60,12 @@ const SellerEditAds = () => {
   const { control, register, handleSubmit, setValue, watch, reset } =
     useForm<any>();
 
-  // API Hooks
   const { data: adDetails, isLoading: isAdLoading } = useGetSingleMyAdQuery(id);
   const { data: categoriesData } = useGetAllCategoriesQuery({
     page: 1,
     limit: 1000,
   });
-     const categories = categoriesData?.data || [];
+  const categories = categoriesData?.data || [];
 
   const { data: categoryDetails } = useGetSingleCategoryQuery(selectedCatId, {
     skip: !selectedCatId,
@@ -70,7 +77,7 @@ const SellerEditAds = () => {
   const currentLat = watch("latitude") || 23.8103;
   const currentLng = watch("longitude") || 90.4125;
 
-  // Effect 1: Load Ad Data into Form
+  // Effect 1: Load Ad Data & Initial Map Sync
   useEffect(() => {
     if (adDetails?.data) {
       const ad = adDetails.data;
@@ -79,22 +86,21 @@ const SellerEditAds = () => {
         latitude: Number(ad.latitude),
         longitude: Number(ad.longitude),
       });
-
       setSelectedCatId(ad.categoryId);
       setExistingImages(ad.images || []);
       setMapCenter([Number(ad.latitude), Number(ad.longitude)]);
     }
   }, [adDetails, reset]);
 
-  // Effect 2: Sync Subcategory and Specs when Category Details are loaded
+  // Effect 2: Sync Subcategory and Specifications
   useEffect(() => {
-    if (categoryDetails?.subCategories && adDetails?.data) {
-      const sub = categoryDetails.subCategories.find(
+    if (subCategories.length > 0 && adDetails?.data) {
+      const sub = subCategories.find(
         (s: any) => s.id === adDetails.data.subCategoryId,
       );
-
       if (sub) {
         setSelectedSubCat(sub);
+        setValue("subCategoryId", adDetails.data.subCategoryId);
         if (adDetails.data.specifications) {
           Object.entries(adDetails.data.specifications).forEach(
             ([key, value]) => {
@@ -104,7 +110,53 @@ const SellerEditAds = () => {
         }
       }
     }
-  }, [categoryDetails, adDetails?.data, setValue]);
+  }, [subCategories, adDetails?.data, setValue]);
+
+  // --- Reverse Geocoding Logic ---
+  const fetchAddressDetails = async (lat: number, lng: number) => {
+    try {
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`,
+      );
+      const data = await res.json();
+      if (data?.address) {
+        const addr = data.address;
+        setValue("country", addr.country || "");
+        setValue("state", addr.state || addr.province || addr.division || "");
+        setValue(
+          "city",
+          addr.city || addr.town || addr.village || addr.suburb || "",
+        );
+        setValue("zipCode", addr.postcode || "");
+        toast.info("Location details updated");
+      }
+    } catch (error) {
+      console.error("Geocoding Error:", error);
+    }
+  };
+
+  function MapClickHandler() {
+    useMapEvents({
+      click(e) {
+        setValue("latitude", e.latlng.lat);
+        setValue("longitude", e.latlng.lng);
+        fetchAddressDetails(e.latlng.lat, e.latlng.lng);
+      },
+    });
+    return null;
+  }
+
+  const getDeviceLocation = () => {
+    if (!navigator.geolocation) return toast.error("Geolocation not supported");
+    navigator.geolocation.getCurrentPosition((pos) => {
+      const { latitude, longitude } = pos.coords;
+      setValue("latitude", latitude);
+      setValue("longitude", longitude);
+      setMapCenter([latitude, longitude]);
+      fetchAddressDetails(latitude, longitude);
+      toast.success("Location Synced!");
+    });
+  };
 
   const handleCategoryChange = (
     catId: string,
@@ -127,8 +179,6 @@ const SellerEditAds = () => {
 
   const onSubmit = async (data: any) => {
     const formData = new FormData();
-
-    // Base Fields
     const baseFields = [
       "title",
       "description",
@@ -140,18 +190,20 @@ const SellerEditAds = () => {
       "zipCode",
       "categoryId",
       "subCategoryId",
-      "showAddress",
-      "allowPhone",
-      "allowEmail",
       "latitude",
       "longitude",
     ];
 
     baseFields.forEach((field) => {
-      if (data[field] !== undefined) formData.append(field, data[field]);
+      if (data[field] !== undefined)
+        formData.append(field, String(data[field]));
     });
 
-    // Specifications
+    // Boolean to String for Backend Logic
+    formData.append("showAddress", data.showAddress ? "true" : "false");
+    formData.append("allowPhone", data.allowPhone ? "true" : "false");
+    formData.append("allowEmail", data.allowEmail ? "true" : "false");
+
     const specs: Record<string, any> = {};
     selectedSubCat?.specFields?.forEach((f: any) => {
       const val = data[`spec_${f.key}`];
@@ -161,7 +213,6 @@ const SellerEditAds = () => {
     });
     formData.append("specifications", JSON.stringify(specs));
 
-    // Images
     newImages.forEach((file) => formData.append("images", file));
     if (deletedImageIds.length > 0) {
       formData.append("imagesToDelete", deletedImageIds.join(","));
@@ -176,25 +227,6 @@ const SellerEditAds = () => {
     }
   };
 
-  function MapClickHandler() {
-    useMapEvents({
-      click(e) {
-        setValue("latitude", e.latlng.lat);
-        setValue("longitude", e.latlng.lng);
-      },
-    });
-    return null;
-  }
-
-  const getDeviceLocation = () => {
-    navigator.geolocation.getCurrentPosition((pos) => {
-      setValue("latitude", pos.coords.latitude);
-      setValue("longitude", pos.coords.longitude);
-      setMapCenter([pos.coords.latitude, pos.coords.longitude]);
-      toast.success("Location Sync!");
-    });
-  };
-
   if (isAdLoading)
     return (
       <div className="h-screen flex items-center justify-center">
@@ -207,7 +239,6 @@ const SellerEditAds = () => {
       <h1 className="text-2xl font-bold">Edit Listing</h1>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
         <div className="flex flex-col lg:flex-row gap-8">
-          {/* Left Column */}
           <div className="flex-1 space-y-6">
             <Card>
               <CardHeader>
@@ -227,15 +258,13 @@ const SellerEditAds = () => {
                       name="categoryId"
                       render={({ field }) => (
                         <Select
-                          key={
-                            field.value ? `cat-${field.value}` : "cat-loading"
-                          }
+                          key={field.value ? `cat-${field.value}` : "loading"}
                           onValueChange={(val) =>
                             handleCategoryChange(val, field.onChange)
                           }
                           value={field.value || ""}
                         >
-                          <SelectTrigger className="w-full">
+                          <SelectTrigger>
                             <SelectValue placeholder="Select Category" />
                           </SelectTrigger>
                           <SelectContent>
@@ -249,7 +278,6 @@ const SellerEditAds = () => {
                       )}
                     />
                   </div>
-
                   <div className="space-y-2">
                     <Label>Sub Category</Label>
                     <Controller
@@ -258,14 +286,15 @@ const SellerEditAds = () => {
                       render={({ field }) => (
                         <Select
                           key={
-                            field.value ? `sub-${field.value}` : "sub-loading"
+                            field.value ? `sub-${field.value}` : "loading-sub"
                           }
                           onValueChange={(val) =>
                             handleSubCategoryChange(val, field.onChange)
                           }
                           value={field.value || ""}
+                          disabled={!subCategories.length}
                         >
-                          <SelectTrigger className="w-full">
+                          <SelectTrigger>
                             <SelectValue placeholder="Select Sub Category" />
                           </SelectTrigger>
                           <SelectContent>
@@ -302,8 +331,8 @@ const SellerEditAds = () => {
                           onValueChange={field.onChange}
                           value={field.value || ""}
                         >
-                          <SelectTrigger className="w-full">
-                            <SelectValue placeholder="Select Purpose" />
+                          <SelectTrigger>
+                            <SelectValue placeholder="Purpose" />
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem value="SALE">For Sale</SelectItem>
@@ -317,7 +346,6 @@ const SellerEditAds = () => {
               </CardContent>
             </Card>
 
-            {/* Specifications */}
             {selectedSubCat?.specFields?.length > 0 && (
               <Card className="bg-slate-50 border-dashed">
                 <CardHeader>
@@ -336,7 +364,7 @@ const SellerEditAds = () => {
                               onValueChange={specField.onChange}
                               value={specField.value || ""}
                             >
-                              <SelectTrigger className="bg-white w-full">
+                              <SelectTrigger className="bg-white">
                                 <SelectValue placeholder="Choose" />
                               </SelectTrigger>
                               <SelectContent>
@@ -372,7 +400,6 @@ const SellerEditAds = () => {
             </Card>
           </div>
 
-          {/* Right Column */}
           <div className="w-full lg:w-[400px] space-y-6">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between">
@@ -405,6 +432,7 @@ const SellerEditAds = () => {
                           const pos = e.target.getLatLng();
                           setValue("latitude", pos.lat);
                           setValue("longitude", pos.lng);
+                          fetchAddressDetails(pos.lat, pos.lng);
                         },
                       }}
                     />
@@ -421,7 +449,8 @@ const SellerEditAds = () => {
             </Card>
 
             <Card>
-              <CardHeader>
+              <CardHeader className="flex flex-row items-center gap-2">
+                <ShieldCheck size={18} className="text-green-600" />
                 <CardTitle>Privacy Settings</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -464,9 +493,9 @@ const SellerEditAds = () => {
                       <button
                         type="button"
                         onClick={() => {
-                          setDeletedImageIds((prev) => [...prev, img.id]);
-                          setExistingImages((prev) =>
-                            prev.filter((item) => item.id !== img.id),
+                          setDeletedImageIds((p) => [...p, img.id]);
+                          setExistingImages((p) =>
+                            p.filter((i) => i.id !== img.id),
                           );
                         }}
                         className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
@@ -488,9 +517,7 @@ const SellerEditAds = () => {
                       <button
                         type="button"
                         onClick={() =>
-                          setNewImages((prev) =>
-                            prev.filter((_, idx) => idx !== i),
-                          )
+                          setNewImages((p) => p.filter((_, idx) => idx !== i))
                         }
                         className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full"
                       >
@@ -506,8 +533,8 @@ const SellerEditAds = () => {
                       className="hidden"
                       onChange={(e) =>
                         e.target.files &&
-                        setNewImages((prev) => [
-                          ...prev,
+                        setNewImages((p) => [
+                          ...p,
                           ...Array.from(e.target.files!),
                         ])
                       }
@@ -520,7 +547,7 @@ const SellerEditAds = () => {
             <Button
               type="submit"
               disabled={isUpdating}
-              className="w-full bg-blue-600 h-12 text-lg"
+              className="w-full bg-[#0064AE] h-12 text-lg"
             >
               {isUpdating ? (
                 <Loader2 className="animate-spin" />
