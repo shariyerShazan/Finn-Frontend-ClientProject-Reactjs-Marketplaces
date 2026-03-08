@@ -31,11 +31,10 @@ interface FilterProps {
 }
 
 const FilterSearch = ({ filters, setFilters }: FilterProps) => {
-  // ১. প্যারামিটার সহ কল করা (ব্যাকএন্ডের নতুন getAllCategories অনুযায়ী)
+
   const { data: categoriesResponse, isLoading: catLoading } =
     useGetAllCategoriesQuery({ page: 1, limit: 100 });
 
-  // ২. ডাটা এক্সট্র্যাক্ট করা (এরর হ্যান্ডেলিং সহ)
   const allCategories = categoriesResponse?.data || [];
 
   const { data: categoryDetails, isFetching: subCatLoading } =

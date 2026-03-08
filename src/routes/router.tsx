@@ -43,6 +43,8 @@ import Profile from "@/main/user/Pages/profile/Profile";
 import PrivateRoute from "./PrivateRoute";
 import TermsAndConditions from "@/components/pg/Terms/TermsAndConditions";
 import PrivacyPolicy from "@/components/pg/privacy/PrivacyPolicy";
+import AboutUs from "@/components/pg/about/AboutUs";
+import ContactUs from "@/components/pg/contact/ContactUs";
 
 export const router = createBrowserRouter([
   {
@@ -101,6 +103,14 @@ export const router = createBrowserRouter([
       {
         path: "privacy" ,
         element: <PrivacyPolicy/>
+      },
+      {
+        path: "about",
+        element: <AboutUs />
+      },
+      {
+        path: "contact" ,
+        element: <ContactUs />
       }
 
       // if the role is user then show user dashboard layout after login or signup ..............User Dashboard Routes
