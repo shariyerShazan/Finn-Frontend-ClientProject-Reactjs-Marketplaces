@@ -7,7 +7,7 @@ import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp
 // import { useVerifyOtpMutation } from "@/redux/api/authApi";
 // import { VerifyOtpRequest } from "@/redux/api/types/auth";
 // import { toast } from "sonner";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 import { useVerifyOtpMutation, type VerifyOtpRequest } from '@/redux/fetures/auth.api';
 import { toast } from 'react-toastify';
@@ -49,19 +49,23 @@ const onSubmit = async (data: VerifyOtpRequest) => {
         <div className="rounded-3xl overflow-hidden hidden md:block shadow-sm">
           <img
             src={loginImg}
-            alt="ByBench Hero"
+            alt=" Hero"
             className="w-full h-[450px] object-cover"
           />
         </div>
 
         <Card className="border-none shadow-sm rounded-[32px] p-8 bg-white">
           <CardContent className="space-y-6 flex flex-col items-center text-center">
-            <div className="flex items-center text-xl font-bold mb-4">
-              <span className="text-zinc-800">by</span>
-              <span className="bg-[#0064AE] text-white px-1.5 py-0.5 rounded-md ml-1">
-                Bench
-              </span>
-            </div>
+            <Link to="/" className="flex items-center gap-3 hover:opacity-90">
+              <div className="w-7 h-7 bg-white rounded flex items-center justify-center">
+                <span className="text-white bg-black p-3 rounded-md font-bold text-xs uppercase italic">
+                  F
+                </span>
+              </div>
+              <h1 className="text-sm font-black text-[#0064AE] uppercase tracking-widest">
+                Finn
+              </h1>
+            </Link>
 
             <h1 className="text-2xl font-bold text-zinc-900">OTP Required</h1>
             <p className="text-zinc-500 text-sm max-w-[280px]">

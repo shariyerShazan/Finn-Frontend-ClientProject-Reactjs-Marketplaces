@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { Loader2, ArrowLeft, Mail, Lock } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { 
   useForgotPasswordMutation, 
@@ -85,28 +85,46 @@ export default function ForgotPassword() {
         <Card className="border-none shadow-sm rounded-[32px] p-6 bg-white overflow-hidden">
           <CardContent className="space-y-6">
             <div className="flex justify-between items-center">
-              <button 
-                onClick={() => step === "reset" ? setStep("request") : navigate("/login")}
+              <button
+                onClick={() =>
+                  step === "reset" ? setStep("request") : navigate("/login")
+                }
                 className="p-2 hover:bg-zinc-100 rounded-full transition-colors"
               >
                 <ArrowLeft className="w-5 h-5 text-zinc-600" />
               </button>
-              <div className="flex items-center text-xl font-bold">
-                <span className="text-zinc-800">by</span>
-                <span className="bg-[#0064AE] text-white px-1.5 rounded-sm ml-1">Bench</span>
-              </div>
+              <Link to="/" className="flex items-center gap-3 hover:opacity-90">
+                <div className="w-7 h-7 bg-white rounded flex items-center justify-center">
+                  <span className="text-white bg-black p-3 rounded-md font-bold text-xs uppercase italic">
+                    F
+                  </span>
+                </div>
+                <h1 className="text-sm font-black text-[#0064AE] uppercase tracking-widest">
+                  Finn
+                </h1>
+              </Link>
             </div>
 
             {step === "request" ? (
               <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
                 <div className="space-y-2">
-                  <h1 className="text-2xl font-bold text-zinc-900">Forgot Password?</h1>
-                  <p className="text-zinc-500 text-sm">Enter your email and we'll send you an OTP to reset your password.</p>
+                  <h1 className="text-2xl font-bold text-zinc-900">
+                    Forgot Password?
+                  </h1>
+                  <p className="text-zinc-500 text-sm">
+                    Enter your email and we'll send you an OTP to reset your
+                    password.
+                  </p>
                 </div>
 
-                <form onSubmit={requestForm.handleSubmit(onRequestSubmit)} className="space-y-4">
+                <form
+                  onSubmit={requestForm.handleSubmit(onRequestSubmit)}
+                  className="space-y-4"
+                >
                   <div className="space-y-1">
-                    <label className="text-sm font-semibold text-zinc-700 ml-1">Email Address</label>
+                    <label className="text-sm font-semibold text-zinc-700 ml-1">
+                      Email Address
+                    </label>
                     <div className="relative">
                       <Mail className="absolute left-4 top-3.5 w-4 h-4 text-zinc-400" />
                       <Input
@@ -122,38 +140,63 @@ export default function ForgotPassword() {
                     disabled={isRequesting}
                     className="w-full bg-[#0064AE] hover:bg-[#005494] text-white py-7 text-lg font-semibold rounded-2xl transition-all"
                   >
-                    {isRequesting ? <Loader2 className="animate-spin" /> : "Send OTP"}
+                    {isRequesting ? (
+                      <Loader2 className="animate-spin" />
+                    ) : (
+                      "Send OTP"
+                    )}
                   </Button>
                 </form>
               </div>
             ) : (
               <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
                 <div className="space-y-2">
-                  <h1 className="text-2xl font-bold text-zinc-900">Reset Password</h1>
-                  <p className="text-zinc-500 text-sm">We've sent a code to <span className="font-semibold text-zinc-800">{userEmail}</span></p>
+                  <h1 className="text-2xl font-bold text-zinc-900">
+                    Reset Password
+                  </h1>
+                  <p className="text-zinc-500 text-sm">
+                    We've sent a code to{" "}
+                    <span className="font-semibold text-zinc-800">
+                      {userEmail}
+                    </span>
+                  </p>
                 </div>
 
-                <form onSubmit={resetForm.handleSubmit(onResetSubmit)} className="space-y-6">
+                <form
+                  onSubmit={resetForm.handleSubmit(onResetSubmit)}
+                  className="space-y-6"
+                >
                   <div className="space-y-3 flex flex-col items-center">
-                    <label className="text-sm font-semibold text-zinc-700 self-start ml-1">Verification Code</label>
-                    <InputOTP 
-                      maxLength={6} 
+                    <label className="text-sm font-semibold text-zinc-700 self-start ml-1">
+                      Verification Code
+                    </label>
+                    <InputOTP
+                      maxLength={6}
                       onChange={(val) => resetForm.setValue("otp", val)}
                     >
                       <InputOTPGroup className="gap-2">
                         {[0, 1, 2, 3, 4, 5].map((i) => (
-                          <InputOTPSlot key={i} index={i} className="w-11 h-12 bg-zinc-100 border-none rounded-lg text-lg font-bold" />
+                          <InputOTPSlot
+                            key={i}
+                            index={i}
+                            className="w-11 h-12 bg-zinc-100 border-none rounded-lg text-lg font-bold"
+                          />
                         ))}
                       </InputOTPGroup>
                     </InputOTP>
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-sm font-semibold text-zinc-700 ml-1">New Password</label>
+                    <label className="text-sm font-semibold text-zinc-700 ml-1">
+                      New Password
+                    </label>
                     <div className="relative">
                       <Lock className="absolute left-4 top-3.5 w-4 h-4 text-zinc-400" />
                       <Input
-                        {...resetForm.register("newPassword", { required: true, minLength: 8 })}
+                        {...resetForm.register("newPassword", {
+                          required: true,
+                          minLength: 8,
+                        })}
                         type="password"
                         placeholder="Minimum 8 characters"
                         className="bg-zinc-100 border-none h-12 rounded-xl pl-11 focus-visible:ring-1 focus-visible:ring-[#0064AE]"
@@ -165,7 +208,11 @@ export default function ForgotPassword() {
                     disabled={isResetting}
                     className="w-full bg-[#0064AE] hover:bg-[#005494] text-white py-7 text-lg font-semibold rounded-2xl transition-all"
                   >
-                    {isResetting ? <Loader2 className="animate-spin" /> : "Reset Password"}
+                    {isResetting ? (
+                      <Loader2 className="animate-spin" />
+                    ) : (
+                      "Reset Password"
+                    )}
                   </Button>
                 </form>
               </div>

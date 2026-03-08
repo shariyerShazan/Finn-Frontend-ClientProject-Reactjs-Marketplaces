@@ -35,7 +35,7 @@ const Navbar = () => {
        if(userData?.data?.role === "USER"){
         navigate("/user/dashboard")
        } else if (userData?.data?.role === "SELLER"){
-         navigate("/user/dashboard")
+         navigate("/seller/dashboard")
        } else if (userData?.data?.role === "ADMIN"){
              navigate("/admin/dashboard");
        } else{

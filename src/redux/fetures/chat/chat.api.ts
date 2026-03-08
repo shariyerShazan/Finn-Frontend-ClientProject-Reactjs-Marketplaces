@@ -54,9 +54,9 @@ export const chatApi = baseApi.injectEndpoints({
       async onCacheEntryAdded(
         arg,
         { updateCachedData, cacheDataLoaded, cacheEntryRemoved },
-      ) {
+      ): Promise<any> {
         const socket = socketService.connect();
-
+        console.log(arg)
         try {
           await cacheDataLoaded;
 
@@ -91,12 +91,12 @@ export const chatApi = baseApi.injectEndpoints({
 
     getMessages: builder.query<ChatResponse<Message>, string>({
       query: (conversationId) => `/chat/messages/${conversationId}`,
-      providesTags: (result, error, id) => [{ type: "Messages", id }],
+      providesTags: (id) => [{ type: "Messages", id }] as any,
 
       async onCacheEntryAdded(
         arg,
         { updateCachedData, cacheDataLoaded, cacheEntryRemoved },
-      ) {
+      ): Promise<any> {
         const socket = socketService.connect();
 
         try {
@@ -165,27 +165,27 @@ export const chatApi = baseApi.injectEndpoints({
     }),
 
     blockChat: builder.mutation<any, string>({
-      query: (conversationId) => ({
+      query: (conversationId: any) => ({
         url: `/chat/block/${conversationId}`,
         method: "PATCH",
       }),
-      invalidatesTags: (result, error, id) => [
+      invalidatesTags: (id: any) => [
         "Chat",
         { type: "Messages", id },
       ],
-    }),
+    } as any),
 
     // ৬. চ্যাট আনব্লক করা
     unblockChat: builder.mutation<any, string>({
-      query: (conversationId) => ({
+      query: (conversationId: any) => ({
         url: `/chat/unblock/${conversationId}`,
         method: "PATCH",
       }),
-      invalidatesTags: (result, error, id) => [
+      invalidatesTags: ( id: any) => [
         "Chat",
         { type: "Messages", id },
       ],
-    }),
+    } as any),
 
     deleteConversation: builder.mutation<ChatResponse<null>, string>({
       query: (conversationId) => ({
@@ -202,9 +202,9 @@ export const chatApi = baseApi.injectEndpoints({
       async onCacheEntryAdded(
         arg,
         { updateCachedData, cacheDataLoaded, cacheEntryRemoved },
-      ) {
+      ) : Promise<any>{
         const socket = socketService.connect();
-
+console.log(arg)
         try {
           await cacheDataLoaded;
 

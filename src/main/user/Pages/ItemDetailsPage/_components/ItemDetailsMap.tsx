@@ -10,7 +10,7 @@ const ItemDetailsMap = ({ latitude, longitude, address, price }: any) => {
   const mapUrl = `https://www.google.com/maps?q=${latitude},${longitude}`;
 
   const embedUrl = `https://www.google.com/maps/embed/v1/view?key=YOUR_GOOGLE_MAPS_API_KEY&center=${latitude},${longitude}&zoom=14`;
-
+console.log(embedUrl)
   const freeEmbedUrl = `https://maps.google.com/maps?q=${latitude},${longitude}&t=&z=14&ie=UTF8&iwloc=&output=embed`;
 
   return (

@@ -30,7 +30,7 @@ const SearchChatSection = ({ conversations, activeId, onSelect }: any) => {
       const partner = c.participants[0]?.user;
       const partnerId = c.participants[0]?.userId;
       const isOnline : boolean = onlineUsers.includes(partnerId);
-
+console.log(isOnline)
       const fullName =
         `${partner?.firstName || ""} ${partner?.lastName || ""}`.toLowerCase();
       return fullName.includes(searchQuery.toLowerCase());

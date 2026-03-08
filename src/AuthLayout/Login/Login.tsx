@@ -8,7 +8,7 @@ import {  Loader2 } from "lucide-react";
 // import { useLoginMutation } from "@/redux/api/authApi";
 // import { LoginRequest } from "@/redux/api/types/auth";
 // import { toast } from "sonner"; // Assuming you use Sonner for notifications
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useLoginMutation, type LoginRequest } from "@/redux/fetures/auth.api";
 import { toast } from "react-toastify";
 import { useState } from "react";
@@ -36,11 +36,14 @@ export default function LoginPage() {
         localStorage.setItem("userId", response.user.id);
         toast.success(response.message || "Login successful");
 
-        const { role, isSeller } = response.user as any;
+        const { role, isSeller , sellerProfile} = response.user as any;
 
         if (role === "SELLER") {
           if (isSeller) {
             navigate("/seller/dashboard");
+          } else if (sellerProfile) {
+            console.log();
+            navigate("/");
           } else {
             navigate("/create-seller-profile");
           }
@@ -89,12 +92,16 @@ export default function LoginPage() {
               <h1 className="text-3xl font-semibold text-zinc-900 tracking-tight">
                 Login
               </h1>
-              <div className="flex items-center text-xl font-bold">
-                <span className="text-zinc-800">by</span>
-                <span className="bg-[#0064AE] text-white px-1.5 py-0.5 rounded-md ml-1 text-lg">
-                  Bench
-                </span>
-              </div>
+              <Link to="/" className="flex items-center gap-3 hover:opacity-90">
+                <div className="w-7 h-7 bg-white rounded flex items-center justify-center">
+                  <span className="text-white bg-black p-3 rounded-md font-bold text-xs uppercase italic">
+                    F
+                  </span>
+                </div>
+                <h1 className="text-sm font-black text-[#0064AE] uppercase tracking-widest">
+                  Finn
+                </h1>
+              </Link>
             </div>
 
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -196,7 +203,6 @@ export default function LoginPage() {
                 />
                 Continue with Google
               </Button>
-
             </div>
 
             <p className="text-center text-zinc-500 mt-8 text-sm">

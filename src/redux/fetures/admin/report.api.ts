@@ -33,7 +33,7 @@ export const reportApi = baseApi.injectEndpoints({
         url: `/report/${id}`,
         method: "GET",
       }),
-      providesTags: (result, error, id) => [{ type: "Reports", id }],
+      providesTags: ( id) => [{ type: "Reports", id }],
     }),
 
     suspendAuth: builder.mutation({

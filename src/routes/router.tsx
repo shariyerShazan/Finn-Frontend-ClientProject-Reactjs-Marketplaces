@@ -41,6 +41,8 @@ import Subscription from "@/main/admin/pages/subscription/Subscription";
 import SellerSubscriptionPage from "@/main/seller/pages/subscription/SellerSubscriptionPage";
 import Profile from "@/main/user/Pages/profile/Profile";
 import PrivateRoute from "./PrivateRoute";
+import TermsAndConditions from "@/components/pg/Terms/TermsAndConditions";
+import PrivacyPolicy from "@/components/pg/privacy/PrivacyPolicy";
 
 export const router = createBrowserRouter([
   {
@@ -92,7 +94,14 @@ export const router = createBrowserRouter([
       {
         path: "item-details/:id",
         element: <ItemDetailsPage />,
-      },
+      }, {
+        path: "terms" ,
+        element: <TermsAndConditions />
+      }, 
+      {
+        path: "privacy" ,
+        element: <PrivacyPolicy/>
+      }
 
       // if the role is user then show user dashboard layout after login or signup ..............User Dashboard Routes
     ],

@@ -11,6 +11,7 @@ export const useSocketInitialize = () => {
     const socket = socketService.connect();
 
     return () => {
+      console.log(socket)
       // Optionally disconnect on unmount
       // socketService.disconnect();
     };

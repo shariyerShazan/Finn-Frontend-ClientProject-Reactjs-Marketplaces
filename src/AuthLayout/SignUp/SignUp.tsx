@@ -10,7 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Loader2, Eye, EyeOff } from "lucide-react";
 import {
   useRegisterMutation,
@@ -70,7 +70,7 @@ export default function SignUp() {
         <div className="rounded-3xl overflow-hidden shadow-sm hidden md:block sticky top-12">
           <img
             src={loginImg}
-            alt="ByBench"
+            alt=""
             className="w-full h-[800px] object-cover"
           />
         </div>
@@ -80,12 +80,16 @@ export default function SignUp() {
           <CardContent className="space-y-6">
             <div className="flex justify-between items-center mb-4">
               <h1 className="text-3xl font-bold text-zinc-900">Registration</h1>
-              <div className="flex items-center text-xl font-bold">
-                <span className="text-zinc-800">by</span>
-                <span className="bg-[#0064AE] text-white px-1.5 rounded-sm ml-1">
-                  Bench
-                </span>
-              </div>
+              <Link to="/" className="flex items-center gap-3 hover:opacity-90">
+                <div className="w-7 h-7 bg-white rounded flex items-center justify-center">
+                  <span className="text-white bg-black p-3 rounded-md font-bold text-xs uppercase italic">
+                    F
+                  </span>
+                </div>
+                <h1 className="text-sm font-black text-[#0064AE] uppercase tracking-widest">
+                  Finn
+                </h1>
+              </Link>
             </div>
 
             <form
@@ -100,7 +104,7 @@ export default function SignUp() {
                   {...register("firstName", {
                     required: "First name is required",
                   })}
-                   placeholder="John"
+                  placeholder="John"
                   className="bg-zinc-100 border-none h-11 rounded-xl"
                 />
               </div>
@@ -110,7 +114,7 @@ export default function SignUp() {
                   Last Name
                 </label>
                 <Input
-                 placeholder="Doe"
+                  placeholder="Doe"
                   {...register("lastName", {
                     required: "Last name is required",
                   })}
@@ -151,7 +155,7 @@ export default function SignUp() {
                   Nickname
                 </label>
                 <Input
-                 placeholder="Your nick name!"
+                  placeholder="Your nick name!"
                   {...register("nickName", { required: true })}
                   className="bg-zinc-100 border-none h-11 rounded-xl"
                 />
@@ -164,7 +168,7 @@ export default function SignUp() {
                 <Input
                   {...register("email", { required: "Email is required" })}
                   type="email"
-                   placeholder="Enter your email address"
+                  placeholder="Enter your email address"
                   className="bg-zinc-100 border-none h-11 rounded-xl"
                 />
               </div>

@@ -1,6 +1,7 @@
 import Navbar from "@/components/navbar/Navbar";
 import { Outlet } from "react-router-dom";
 import { useSocketInitialize } from "@/hooks/useSocketInitialize";
+import Footer from "@/components/footer/Footer";
 
 function ParentLayout() {
   // Initialize socket connection
@@ -13,6 +14,7 @@ function ParentLayout() {
       <div className="mt-18 w-[90%] mx-auto">
         <Outlet />
       </div>
+      <Footer />
     </div>
   );
 }

@@ -26,7 +26,7 @@ export const commentApi = baseApi.injectEndpoints({
         url: `/comments/ad/${adId}`,
         method: "GET",
       }),
-      providesTags: (result, error, adId) => [{ type: "Comments", id: adId }],
+      providesTags: ( adId) => [{ type: "Comments", id: adId }],
     }),
 
     // ৩. কমেন্ট আপডেট করা
