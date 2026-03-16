@@ -30,6 +30,8 @@ export const baseApi = createApi({
     "SubscriptionPlan",
     "Notification",
     "UnreadCount",
+    "AdBoost",
+    "Boosts",
   ],
   endpoints: () => ({}),
 });

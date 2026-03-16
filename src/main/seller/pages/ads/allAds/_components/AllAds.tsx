@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, Search, Eye, Edit, Trash2, Filter, Loader2, RotateCcw, CheckCircle } from "lucide-react";
+import { Plus, Search, Eye, Edit, Trash2, Filter, Loader2, RotateCcw, CheckCircle, Rocket, Zap } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
   Select,
@@ -22,6 +22,7 @@ import { useDeleteAdMutation, useToggleSoldStatusMutation } from "@/redux/feture
 import { useGetMyAdsQuery } from "@/redux/fetures/users.api";
 import ViewAdDialog from "./ViewAdDialogProps";
 import { toast } from "react-toastify";
+import BoostAdSelectionModal from "./BoostAdSelectionModal";
 
 interface AdData {
   id: string;
@@ -37,6 +38,8 @@ interface AdData {
 }
 
 const AllAds = () => {
+  const [isBoostModalOpen, setIsBoostModalOpen] = useState(false);
+  const [adIdToBoost, setAdIdToBoost] = useState<string | null>(null);
   const navigate = useNavigate();
 
   // --- States ---
@@ -264,6 +267,38 @@ const columns: Column<AdData>[] = [
         >
           <Trash2 size={16} />
         </button>
+        <button
+          onClick={() => {
+            setAdIdToBoost(item.id);
+            setIsBoostModalOpen(true);
+          }}
+          title="Boost Ad"
+          className="p-2 text-amber-500 hover:bg-amber-50 border border-amber-100 rounded-xl transition-all cursor-pointer shadow-sm"
+        >
+          <Rocket size={16} />
+        </button>
+      </div>
+    ),
+  },
+  {
+    header: "Boost Info",
+    render: (item: any) => (
+      <div className="min-w-[140px]">
+        {item.isBoosted && item.boostInfo?.endDate ? (
+          <div className="flex flex-col gap-1">
+            <div className="flex items-center gap-1 text-amber-600">
+              <Zap size={12} className="fill-amber-500" />
+              <span className="text-[10px] font-black uppercase tracking-wider">
+                Premium Boost
+              </span>
+            </div>
+            <RemainingTime endDate={item.boostInfo.endDate} />
+          </div>
+        ) : (
+          <span className="text-[10px] font-bold text-slate-300 uppercase tracking-widest">
+            No Active Boost
+          </span>
+        )}
       </div>
     ),
   },
@@ -359,7 +394,6 @@ const columns: Column<AdData>[] = [
         {/* Pagination Section */}
         <div className="p-6 bg-slate-50/50 border-t border-slate-100">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-           
             <CommonPagination
               currentPage={page}
               totalPages={totalPages || 1}
@@ -376,8 +410,60 @@ const columns: Column<AdData>[] = [
         ad={selectedAd}
         onEdit={(id) => navigate(`/seller/dashboard/ads/edit/${id}`)}
       />
+      <BoostAdSelectionModal
+        isOpen={isBoostModalOpen}
+        onClose={() => setIsBoostModalOpen(false)}
+        adId={adIdToBoost}
+      />
     </div>
   );
 };
 
 export default AllAds;
+
+
+
+const RemainingTime = ({ endDate }: { endDate: string }) => {
+  const [timeLeft, setTimeLeft] = useState("");
+
+  useEffect(() => {
+    const calculateTime = () => {
+      const now = new Date().getTime();
+      const expiry = new Date(endDate).getTime();
+      const diff = expiry - now;
+
+      if (diff <= 0) {
+        setTimeLeft("Expired");
+        return;
+      }
+
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor(
+        (diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60),
+      );
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+
+      setTimeLeft(`${days}d ${hours}h ${minutes}m`);
+    };
+
+    calculateTime();
+    const timer = setInterval(calculateTime, 60000);
+    return () => clearInterval(timer);
+  }, [endDate]);
+
+  if (timeLeft === "Expired") {
+    return (
+      <div className="flex items-center gap-1 text-rose-500 bg-rose-50 px-2 py-0.5 rounded-md w-fit border border-rose-100">
+        <span className="text-[10px] font-black uppercase">Expired</span>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex items-center gap-1 text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md w-fit border border-amber-100">
+      <span className="text-[10px] font-bold whitespace-nowrap">
+        {timeLeft} left
+      </span>
+    </div>
+  );
+};

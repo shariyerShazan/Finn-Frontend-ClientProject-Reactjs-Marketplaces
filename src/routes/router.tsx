@@ -45,6 +45,7 @@ import TermsAndConditions from "@/components/pg/Terms/TermsAndConditions";
 import PrivacyPolicy from "@/components/pg/privacy/PrivacyPolicy";
 import AboutUs from "@/components/pg/about/AboutUs";
 import ContactUs from "@/components/pg/contact/ContactUs";
+import AdBoost from "@/main/admin/pages/ad-boost/AdBoost";
 
 export const router = createBrowserRouter([
   {
@@ -198,6 +199,10 @@ export const router = createBrowserRouter([
         path: "subscription",
         element: <Subscription />,
       },
+      {
+        path: "ad-boost",
+        element: <AdBoost />
+      }
     ],
   },
   {
