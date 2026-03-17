@@ -14,7 +14,7 @@ export const paymentApi = baseApi.injectEndpoints({
 
     getMyPaymentHistory: builder.query({
       query: () => ({
-        url: "/payments/my-sub-history", // Match your personal history route
+        url: "user/subscription/my-history", // Match your personal history route
         method: "GET",
       }),
       providesTags: ["Payments"],
@@ -33,7 +33,7 @@ export const paymentApi = baseApi.injectEndpoints({
         url: `/payments/sub-history/${id}`,
         method: "GET",
       }),
-      providesTags: ( id) => [{ type: "Payments", id }],
+      providesTags: (id) => [{ type: "Payments", id }],
     }),
 
     // --- New Ad Boost Endpoints ---
