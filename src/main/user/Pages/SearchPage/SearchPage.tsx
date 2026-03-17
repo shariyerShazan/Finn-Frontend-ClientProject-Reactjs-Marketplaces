@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable react-hooks/set-state-in-effect */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
@@ -7,14 +8,28 @@ import {
   Map as MapIcon,
   Loader2,
   PackageSearch,
+  // ExternalLink,
 } from "lucide-react";
 import FilterSearch from "./_components/FilterSearch";
 import AdCard from "../HomePage/_components/AdCard";
 import CommonPagination from "../../_components/CommonPagination";
 import { useGetAllAdsQuery } from "@/redux/fetures/ads.api";
-import { useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
+import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
 
 const SearchPage = () => {
+  // Fix for default Leaflet marker icons in React
+  const customIcon = new L.Icon({
+    iconUrl:
+      "[https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png](https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png)",
+    shadowUrl:
+      "[https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png](https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png)",
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+  });
+
   const [searchParams] = useSearchParams();
   const [viewMode, setViewMode] = useState<"grid" | "map">("grid");
   const initialSearch = searchParams.get("search") || "";
@@ -51,6 +66,12 @@ const SearchPage = () => {
   const ads = data?.data || [];
   const meta = data?.meta || { total: 0, page: 1, limit: 12 };
   const totalPages = Math.ceil(meta.total / meta.limit) || 1;
+
+  const defaultCenter: [number, number] =
+    ads.length > 0 && ads[0].latitude
+      ? [ads[0].latitude, ads[0].longitude]
+      : [23.8103, 90.4125]; // Default Dhaka
+
 
   return (
     <div className="min-h-screen bg-gray-50/30">
@@ -144,19 +165,69 @@ const SearchPage = () => {
             )}
           </>
         ) : (
-          <div className="w-full h-[60vh] bg-slate-100 rounded-3xl border border-slate-200 flex items-center justify-center animate-in zoom-in duration-300">
-            <div className="text-center">
-              <MapIcon
-                size={56}
-                className="text-[#0064AE] mx-auto mb-4 opacity-20"
-              />
-              <h3 className="text-xl font-bold text-slate-800">
-                Map Interface Ready
-              </h3>
-              <p className="text-slate-500 italic">
-                Bhai, Google Maps API key dilei visual-ta joss hobe!
-              </p>
+          <div className="w-full h-[75vh] rounded-[2rem] overflow-hidden border-4 border-white shadow-2xl z-10 relative group">
+            {/* Floating Indicator */}
+            <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[1000] bg-white/90 backdrop-blur-md px-4 py-2 rounded-full shadow-lg border border-slate-200 text-xs font-bold text-slate-700 flex items-center gap-2">
+              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+              Showing {ads?.length || 0} Available Locations
             </div>
+
+            <MapContainer
+              center={defaultCenter}
+              zoom={13}
+              scrollWheelZoom={true}
+              className="w-full h-full"
+              zoomControl={false}
+              style={{ height: "100%", width: "100%" }}
+            >
+              {/* 🌍 Standard TileLayer: এটি কখনও মিস হবে না */}
+              <TileLayer
+                attribution='&copy; <a href="[https://www.openstreetmap.org/copyright](https://www.openstreetmap.org/copyright)">OpenStreetMap</a> contributors'
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              />
+
+              {ads?.map(
+                (ad: any) =>
+                  ad.latitude &&
+                  ad.longitude && (
+                    <Marker
+                      key={ad.id}
+                      position={[Number(ad.latitude), Number(ad.longitude)]}
+                      icon={customIcon} // নিশ্চিত করুন customIcon উপরে ডিফাইন করা আছে
+                    >
+                      <Popup minWidth={260} className="custom-popup">
+                        <div className="relative overflow-hidden rounded-xl bg-white">
+                          <div className="relative h-32 w-full overflow-hidden">
+                            <img
+                              src={
+                                ad.images?.[0]?.url ||
+                                ad.images?.[0] ||
+                                "[https://via.placeholder.com/300x200](https://via.placeholder.com/300x200)"
+                              }
+                              alt={ad.title}
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                          <div className="p-3">
+                            <h4 className="font-bold text-slate-900 text-sm">
+                              {ad.title}
+                            </h4>
+                            <p className="text-[#0064AE] font-bold text-xs">
+                              {ad.price} {ad.currency || "PLN"}
+                            </p>
+                            <Link
+                              to={`/item-details/${ad.id}`}
+                              className="mt-3 block text-center bg-slate-900 text-white py-2 rounded-lg text-[11px] font-bold"
+                            >
+                              View Details
+                            </Link>
+                          </div>
+                        </div>
+                      </Popup>
+                    </Marker>
+                  ),
+              )}
+            </MapContainer>
           </div>
         )}
 
